@@ -1,7 +1,8 @@
 CXX      = g++
-CXXFLAGS = $(shell fltk-config --use-gl --use-images --cxxflags)
-LFLAGS   = $(shell fltk-config --use-gl --use-images --ldflags )
+CXXFLAGS = $(shell fltk-config --use-gl)
+LFLAGS   = $(shell fltk-config --use-gl --ldflags)
 INCL     = -I./include
+LIBS     = -L./libs
 DEBUG    = -g -Wall
 
 SRCS = ./src/*.cpp
@@ -15,7 +16,7 @@ all:	$(MAIN)
 	 @echo Compiled $(MAIN)
 
 $(MAIN): $(OBJS)
-	 $(CXX) $(CXXFLAGS) $(DEBUG) $(INCL) -o $(MAIN) $(OBJS) $(LFLAGS)
+	 $(CXX) $(CXXFLAGS) $(DEBUG) $(INCL) $(LIBS) -o $(MAIN) $(OBJS) $(LFLAGS)
 
 %.o : %.c
 	 $(CXX) $(INCL) $(CXXFLAGS) -c $< -o $@
