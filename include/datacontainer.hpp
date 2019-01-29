@@ -9,11 +9,6 @@
 
 #include <cstdint>
 
-struct DataPair {
-  float e1;
-  float e2;
-};
-
 struct FileHeaderData { // From the VnmrJ User Programming manual
   uint32_t nblocks;     // number of blocks in file
   uint32_t ntraces;     // number of traces per block
@@ -38,18 +33,50 @@ struct BlockHeaderData { // From the VnmrJ User Programming manual
   float tlt;             // tilt drift correction
 };
 
+struct FileStatus {
+  bool s_data;
+  bool s_spec;
+  bool s_32;
+  bool s_float;
+  bool s_cmplx;
+  bool s_hypercmplx;
+  bool s_acqpar;
+  bool s_secnd;
+  bool s_transf;
+  bool s_np;
+  bool s_nf;
+  bool s_ni;
+  bool s_ni2;
+};
+
 class DataContainer {
  public:
-  DataContainer(long cont_size, bool is_real);
+  DataContainer();
   ~DataContainer();
+  DataContainer(DataContainer&& other);
 
-  void AddPair(float e1, float e2);
-  DataPair GetPair(int index);
+  DataContainer& operator=(DataContainer&& other);
+
+  void SetFHeader(FileHeaderData header);
+  void SetBHeader(int pos, BlockHeaderData bheader);
+  void SetSize(int arr_size, int bheaders_size);
+  void SetIsReal(bool is_real);
+
+  int GetLength();
+  int GetCapacity();
+
+  bool* GetFileStatus();
+  bool PushFloat(float val);
+  bool IsEmpty();
+
+  float PullFloat();
 
  private:
-  long cont_size_;
+  float* array_;
+  long capacity_;
   bool is_real_;
+  int index_;
 
-  FileHeaderData fid_header_;
-  DataPair* cont_array_;
+  BlockHeaderData* bheaders_;
+  FileHeaderData file_header_;
 };

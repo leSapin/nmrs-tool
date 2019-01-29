@@ -8,16 +8,33 @@
 
 #include "fiddecoder.hpp"
 
+#include <iostream>
+
 using namespace std;
 
-FIDDecoder::FIDDecoder(string fid_path) : fid_path_(fid_path) {
-
+FIDDecoder::FIDDecoder() {
+  fid_path_ = "";
 }
 
-FIDDecoder::~FIDDecoder() {
+float FIDDecoder::SwapFloat(float value) {
+  // Convert mid-little endian to little endian float
+  union {uint8_t b[4]; float inFloat; } in;
+  union {uint8_t b[4]; float outFloat;} out;
+  in.inFloat = value;
 
+  out.b[0] = in.b[1];
+  out.b[1] = in.b[0];
+  out.b[2] = in.b[3];
+  out.b[3] = in.b[2];
+
+  return out.outFloat;
 }
 
+void FIDDecoder::SetFIDPath(string new_path) {
+  fid_path_ = new_path;
+}
+
+// Varian devices store data in big-endian format
 FileHeaderData FIDDecoder::DecodeFileHeader() {
   FileHeaderData res;
   uint32_t tmp_32;
@@ -50,12 +67,16 @@ FileHeaderData FIDDecoder::DecodeFileHeader() {
   fid_file_.read(reinterpret_cast<char*>(&tmp_32), 4);
   res.nbheaders = __builtin_bswap32(tmp_32);
 
+  cout << "File status: " << res.status << endl;
+  cout << "ntraces: " << res.ntraces << endl;
+  cout << "np: " << res.np << endl;
   return res;
 }
 
 BlockHeaderData FIDDecoder::DecodeBlockHeader(long block_offset) {
   BlockHeaderData res;
   float tmp_float;
+
   uint32_t tmp_32;
   uint16_t tmp_16;
 
@@ -65,13 +86,13 @@ BlockHeaderData FIDDecoder::DecodeBlockHeader(long block_offset) {
   res.scale = __builtin_bswap16(tmp_16);
 
   fid_file_.read(reinterpret_cast<char*>(&tmp_16), 2);
-  res.status = __builtin_bswap16(tmp_16);
+  res.status = tmp_16;
 
   fid_file_.read(reinterpret_cast<char*>(&tmp_16), 2);
   res.index = __builtin_bswap16(tmp_16);
 
   fid_file_.read(reinterpret_cast<char*>(&tmp_16), 2);
-  res.mode = __builtin_bswap16(tmp_16);
+  res.mode = tmp_16;
 
   fid_file_.read(reinterpret_cast<char*>(&tmp_32), 4);
   res.ctcount = __builtin_bswap32(tmp_32);
@@ -92,18 +113,44 @@ BlockHeaderData FIDDecoder::DecodeBlockHeader(long block_offset) {
 }
 
 DataContainer FIDDecoder::ExtractFIDData() {
-  DataContainer res (52, true);
+  DataContainer res;
+
   fid_file_.open(fid_path_ + "/fid", ios::binary | ios::in);
+  if (!fid_file_) {return res;}
 
-  if (!fid_file_) {
-    return res;
+  FileHeaderData header = DecodeFileHeader();
+
+  // Bytes per block - block header size
+  int fid_bytes = (header.bbytes - 28 ) * header.nblocks;
+  int arr_size = ((fid_bytes / sizeof(float)));
+
+  cout << "Header blocks: " << header.nblocks << endl;
+  cout << "Fid bytes: " << fid_bytes << endl;
+  cout << "num of floats: " << arr_size << endl;
+
+  res.SetSize(arr_size, header.nblocks * header.nbheaders);
+  res.SetFHeader(header);
+  res.SetIsReal(true);
+
+  float tmp_float;
+  int bheader_pos = 0;
+  std::ofstream myfile("fid_data");
+
+  for (int i = 0; i < header.nblocks; ++i) {
+    for (int k = 0; k < header.nbheaders; ++k) {
+      res.SetBHeader(bheader_pos, DecodeBlockHeader(fid_file_.tellg()));
+      ++bheader_pos;
+    }
+
+    for (int j = 0; j < arr_size / header.nblocks; ++j) {
+      fid_file_.read(reinterpret_cast<char*>(&tmp_float), 4);
+      res.PushFloat(SwapFloat(tmp_float));
+      myfile << SwapFloat(tmp_float) << "\n";
+    }
   }
 
-  FileHeaderData header_data = DecodeFileHeader();
-
-  for (int i = 0; i < header_data.nblocks; ++i) {
-    auto cur_blockh = DecodeBlockHeader(fid_file_.tellg());
-  }
+  myfile.close();
+  cout << "Container size: " << res.GetLength() << endl;
 
   fid_file_.close();
 

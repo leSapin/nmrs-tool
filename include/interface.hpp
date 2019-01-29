@@ -16,19 +16,21 @@
 
 #include <FL/Fl_Window.H>
 
+#include "analyzer.hpp"
+#include "spectrumwin.hpp"
+#include "numericwin.hpp"
+#include "nmrmlparser.hpp"
+
 struct Fl_Menu_Bar;
-class SpectrumWin;
-class NumericWin;
-class Analyzer;
 
 class Interface : public Fl_Window {
  public:
   Interface(int w, int h, const char* l);
 
  private:
-  SpectrumWin *spectrum_win_;
-  NumericWin *numeric_win_;
-  Analyzer *analyzer_;
+  SpectrumWin spectrum_win_;
+  NumericWin numeric_win_;
+  Analyzer analyzer_;
 
   Fl_Menu_Bar *menu_bar_;
 };

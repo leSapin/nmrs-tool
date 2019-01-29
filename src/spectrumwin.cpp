@@ -5,8 +5,9 @@
  *
  */
 
-#include "spectrumwin.hpp"
 #include <FL/gl.h>
+
+#include "spectrumwin.hpp"
 
 SpectrumWin::SpectrumWin(int x, int y, int w, int h, const char *l)
             :Fl_Gl_Window(x, y, w, h, l) {
