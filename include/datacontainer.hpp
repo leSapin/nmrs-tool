@@ -52,9 +52,11 @@ struct FileStatus {
 class DataContainer {
  public:
   DataContainer();
-  ~DataContainer();
+  DataContainer(const DataContainer&);
   DataContainer(DataContainer&& other);
+  ~DataContainer();
 
+  DataContainer& operator=(const DataContainer&);
   DataContainer& operator=(DataContainer&& other);
 
   void SetFHeader(FileHeaderData header);
@@ -72,8 +74,8 @@ class DataContainer {
 
  private:
   int    index_;
-  float* array_;
   long   capacity_;
+  float* array_;
 
   FileStatus       fstatus_;
   FileHeaderData   file_header_;

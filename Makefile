@@ -3,7 +3,7 @@ CXXFLAGS = $(shell fltk-config --use-gl)
 LFLAGS   = $(shell fltk-config --use-gl --ldflags)
 INCL     = -I./include
 LIBS     = -L./libs
-DEBUG    = -g -Wall
+DEBUG    = -g -p -Wall
 
 SRCS = ./src/*.cpp
 OBJS = $(SRCS:.cpp = .o)

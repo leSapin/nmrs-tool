@@ -21,7 +21,7 @@ class Analyzer {
   void DoNumericAnalysis();
 
  private:
-  FIDDecoder fid_decoder_;
+  FIDDecoder    fid_decoder_;
   DataContainer fid_data_;
 };
 
