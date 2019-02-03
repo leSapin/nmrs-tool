@@ -8,8 +8,6 @@
 
 #include "fiddecoder.hpp"
 
-#include <iostream>
-
 using namespace std;
 
 FIDDecoder::FIDDecoder() {
@@ -67,9 +65,6 @@ FileHeaderData FIDDecoder::DecodeFileHeader() {
   fid_file_.read(reinterpret_cast<char*>(&tmp_32), 4);
   res.nbheaders = __builtin_bswap32(tmp_32);
 
-  cout << "File status: " << res.status << endl;
-  cout << "ntraces: " << res.ntraces << endl;
-  cout << "np: " << res.np << endl;
   return res;
 }
 
@@ -112,6 +107,10 @@ BlockHeaderData FIDDecoder::DecodeBlockHeader(long block_offset) {
   return res;
 }
 
+bool FIDDecoder::SetFlag(int status, int flag) {
+  return (status & (1 << flag));
+}
+
 DataContainer FIDDecoder::ExtractFIDData() {
   DataContainer res;
 
@@ -124,17 +123,25 @@ DataContainer FIDDecoder::ExtractFIDData() {
   int fid_bytes = (header.bbytes - 28 ) * header.nblocks;
   int arr_size = ((fid_bytes / sizeof(float)));
 
-  cout << "Header blocks: " << header.nblocks << endl;
-  cout << "Fid bytes: " << fid_bytes << endl;
-  cout << "num of floats: " << arr_size << endl;
-
   res.SetSize(arr_size, header.nblocks * header.nbheaders);
   res.SetFHeader(header);
-  res.SetIsReal(true);
+  FileStatus fstatus = {SetFlag(header.status, 0),
+                        SetFlag(header.status, 1),
+                        SetFlag(header.status, 2),
+                        SetFlag(header.status, 3),
+                        SetFlag(header.status, 4),
+                        SetFlag(header.status, 5),
+                        SetFlag(header.status, 7),
+                        SetFlag(header.status, 8),
+                        SetFlag(header.status, 9),
+                        SetFlag(header.status, 11),
+                        SetFlag(header.status, 12),
+                        SetFlag(header.status, 13),
+                        SetFlag(header.status, 14)};
+  res.SetFStatus(fstatus);
 
   float tmp_float;
   int bheader_pos = 0;
-  std::ofstream myfile("fid_data");
 
   for (int i = 0; i < header.nblocks; ++i) {
     for (int k = 0; k < header.nbheaders; ++k) {
@@ -145,12 +152,8 @@ DataContainer FIDDecoder::ExtractFIDData() {
     for (int j = 0; j < arr_size / header.nblocks; ++j) {
       fid_file_.read(reinterpret_cast<char*>(&tmp_float), 4);
       res.PushFloat(SwapFloat(tmp_float));
-      myfile << SwapFloat(tmp_float) << "\n";
     }
   }
-
-  myfile.close();
-  cout << "Container size: " << res.GetLength() << endl;
 
   fid_file_.close();
 

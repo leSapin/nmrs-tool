@@ -18,16 +18,17 @@ class FIDDecoder {
  public:
   FIDDecoder();
 
-  void SetFIDPath(std::string new_path);
+  bool          SetFlag(int status, int flag);
+  void          SetFIDPath(std::string new_path);
   DataContainer ExtractFIDData();
 
  private:
   std::string fid_path_;
   std::ifstream fid_file_;
 
-  FileHeaderData DecodeFileHeader();
+  float           SwapFloat(float value);
+  FileHeaderData  DecodeFileHeader();
   BlockHeaderData DecodeBlockHeader(long block_offset);
-  float SwapFloat(float value);
 };
 
 #endif // FID_DECODER_HPP

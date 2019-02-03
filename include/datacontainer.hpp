@@ -27,10 +27,10 @@ struct BlockHeaderData { // From the VnmrJ User Programming manual
   uint16_t index;        // block index
   uint16_t mode;         // mode of data in block
   uint32_t ctcount;      // ct value for FID
-  float lpval;           // f2 (2D-f1) left phase in phasefile
-  float rpval;           // f2 (2D-f1) right phase in phasefile
-  float lvl;             // level drift correction
-  float tlt;             // tilt drift correction
+  float    lpval;        // f2 (2D-f1) left phase in phasefile
+  float    rpval;        // f2 (2D-f1) right phase in phasefile
+  float    lvl;          // level drift correction
+  float    tlt;          // tilt drift correction
 };
 
 struct FileStatus {
@@ -58,25 +58,24 @@ class DataContainer {
   DataContainer& operator=(DataContainer&& other);
 
   void SetFHeader(FileHeaderData header);
+  void SetFStatus(FileStatus status);
   void SetBHeader(int pos, BlockHeaderData bheader);
   void SetSize(int arr_size, int bheaders_size);
-  void SetIsReal(bool is_real);
 
-  int GetLength();
-  int GetCapacity();
-
-  bool* GetFileStatus();
-  bool PushFloat(float val);
-  bool IsEmpty();
+  int  GetLength();
+  int  GetCapacity();
+  bool GetFlag(int flag);
 
   float PullFloat();
+  bool  PushFloat(float val);
+  bool  IsEmpty();
 
  private:
+  int    index_;
   float* array_;
-  long capacity_;
-  bool is_real_;
-  int index_;
+  long   capacity_;
 
+  FileStatus       fstatus_;
+  FileHeaderData   file_header_;
   BlockHeaderData* bheaders_;
-  FileHeaderData file_header_;
 };
