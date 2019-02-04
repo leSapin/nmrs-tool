@@ -1,6 +1,0 @@
-#ifndef NMRML_PARSER_HPP
-#define NMRML_PARSER_HPP
-
-
-
-#endif // NMRL_PARSER_HPP
