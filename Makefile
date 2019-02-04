@@ -1,30 +1,29 @@
-CXX      = g++
-CXXFLAGS = $(shell fltk-config --use-gl)
-LFLAGS   = $(shell fltk-config --use-gl --ldflags)
-INCL     = -I./include
-LIBS     = -L./libs
-DEBUG    = -g -p -Wall
-
-SRCS = ./src/*.cpp
-OBJS = $(SRCS:.cpp = .o)
-MAIN = ./bin/nmrs-tool
+CC      = g++
+CFLAGS  = $(shell fltk-config --use-gl)
+LDFLAGS = $(shell fltk-config --use-gl --ldflags)
+DEBG	  = -g -p -Wall -Wextra
+GCOV		= -fprofile-arcs -ftest-coverage
+#OPT		  = -O2
+INC     = -Iinc
+LIB     = -Llib
 
 .PHONY: depend clean
 .SUFFIXES: .o .cpp
 
-all:	$(MAIN)
-	 @echo Compiled $(MAIN)
+MAIN = bin/run
+SRCS = $(wildcard src/*.cpp)
+OBJS = $(patsubst src/%.cpp, obj/%.o, $(SRCS))
+OBJDIR = obj/
+SRCDIR = src/
+
+all: $(MAIN)
 
 $(MAIN): $(OBJS)
-	 $(CXX) $(CXXFLAGS) $(DEBUG) $(INCL) $(LIBS) -o $(MAIN) $(OBJS) $(LFLAGS)
+	$(CC) $(LIB) $(GCOV) $^ -o $@ $(LDFLAGS)
 
-%.o : %.c
-	 $(CXX) $(INCL) $(CXXFLAGS) -c $< -o $@
+$(OBJDIR)%.o: $(SRCDIR)%.cpp
+	$(CC) $(GCOV) $(OPT) $(INC) $(DEBG) $(CFLAGS) -c $< -o $@
 
 clean:
-	 $(RM) *.o *~ $(MAIN)
+	$(RM) $(OBJS) $(MAIN) $(OBJDIR)*.gc*
 
-depend: $(SRCS)
-	 makedepend $(INCL) $^
-
-#

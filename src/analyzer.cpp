@@ -7,7 +7,6 @@
  */
 
 #include "analyzer.hpp"
-#include <fstream>
 
 Analyzer::Analyzer() : fid_decoder_() {}
 
