@@ -14,7 +14,6 @@
 #include <FL/Fl_Menu_Bar.H>
 #include <FL/Fl_Menu_Item.H>
 #include <FL/Fl_Window.H>
-#include <iostream>
 
 #include "interface.hpp"
 
@@ -44,8 +43,5 @@ Interface::Interface(int w, int h, const char* l)
   menu_bar_ = new Fl_Menu_Bar(0, 0, w, 30);
   menu_bar_->copy(menu_items);
 
-  cout << analyzer_.CreateFIDData() << endl;
-
   end();
 }
-

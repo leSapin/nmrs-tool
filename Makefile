@@ -1,9 +1,9 @@
 CC      = g++
 CFLAGS  = $(shell fltk-config --use-gl)
 LDFLAGS = $(shell fltk-config --use-gl --ldflags)
-DEBG	  = -g -p -Wall -Wextra
-GCOV		= -fprofile-arcs -ftest-coverage
-#OPT		  = -O2
+DEBG    = -g -p -Wall -Wextra
+#GCOV    = -fprofile-arcs -ftest-coverage
+#OPT    = -O2
 INC     = -Iinc
 LIB     = -Llib
 
@@ -19,7 +19,7 @@ SRCDIR = src/
 all: $(MAIN)
 
 $(MAIN): $(OBJS)
-	$(CC) $(LIB) $(GCOV) $^ -o $@ $(LDFLAGS)
+	$(CC) $(LIB) $(DEBG) $(GCOV) $^ -o $@ $(LDFLAGS)
 
 $(OBJDIR)%.o: $(SRCDIR)%.cpp
 	$(CC) $(GCOV) $(OPT) $(INC) $(DEBG) $(CFLAGS) -c $< -o $@

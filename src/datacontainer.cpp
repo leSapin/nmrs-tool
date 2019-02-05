@@ -8,13 +8,11 @@
  */
 
 #include "datacontainer.hpp"
-#include <iostream>
 
 DataContainer::DataContainer() {
   bheaders_ = nullptr;
   array_    = nullptr;
   index_    = 0;
-  std::cout << "Using default constructor" << std::endl;
 }
 
 DataContainer::~DataContainer() {
@@ -36,8 +34,6 @@ DataContainer::DataContainer(DataContainer&& other) {
   other.index_       = 0;
   other.array_       = nullptr;
   other.bheaders_    = nullptr;
-
-  std::cout << "Using move constructor" << std::endl;
 }
 
 DataContainer& DataContainer::operator=(DataContainer&& other) {
@@ -59,7 +55,6 @@ DataContainer& DataContainer::operator=(DataContainer&& other) {
     other.array_       = nullptr;
     other.bheaders_    = nullptr;
   }
-  std::cout << "Using move assignment" << std::endl;
   return *this;
 }
 

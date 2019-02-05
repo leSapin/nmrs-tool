@@ -73,11 +73,11 @@ class DataContainer {
   bool  IsEmpty();
 
  private:
-  int   index_;
-  long  capacity_;
-  float *array_;
+  int    index_;
+  long   capacity_;
+  float* array_;
 
-  FileStatus      fstatus_;
-  FileHeaderData  file_header_;
-  BlockHeaderData *bheaders_;
+  FileStatus       fstatus_;
+  FileHeaderData   file_header_;
+  BlockHeaderData* bheaders_;
 };
