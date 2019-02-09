@@ -9,10 +9,12 @@
 
 #include "datacontainer.hpp"
 
-DataContainer::DataContainer() {
-  bheaders_ = nullptr;
-  array_    = nullptr;
-  index_    = 0;
+DataContainer::DataContainer(int arr_size, int bheaders_size) {
+  index_     = 0;
+  capacity_  = arr_size;
+  bheaders_  = new BlockHeaderData[bheaders_size];
+  array_     = new float[arr_size];
+  finalized_ = false;
 }
 
 DataContainer::~DataContainer() {
@@ -27,6 +29,7 @@ DataContainer::DataContainer(DataContainer&& other) {
   index_       = other.index_;
   bheaders_    = other.bheaders_;
   fstatus_     = other.fstatus_;
+  finalized_   = other.finalized_;
 
   other.file_header_ = {0, 0, 0, 0, 0, 0, 0, 0, 0};
   other.fstatus_     = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -34,6 +37,7 @@ DataContainer::DataContainer(DataContainer&& other) {
   other.index_       = 0;
   other.array_       = nullptr;
   other.bheaders_    = nullptr;
+  other.finalized_   = false;
 }
 
 DataContainer& DataContainer::operator=(DataContainer&& other) {
@@ -47,6 +51,7 @@ DataContainer& DataContainer::operator=(DataContainer&& other) {
     index_       = other.index_;
     bheaders_    = other.bheaders_;
     fstatus_     = other.fstatus_;
+    finalized_   = other.finalized_;
 
     other.file_header_ = {0, 0, 0, 0, 0, 0, 0, 0, 0};
     other.fstatus_     = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -54,26 +59,25 @@ DataContainer& DataContainer::operator=(DataContainer&& other) {
     other.index_       = 0;
     other.array_       = nullptr;
     other.bheaders_    = nullptr;
+    other.finalized_   = false;
   }
   return *this;
 }
 
-void DataContainer::SetSize(int arr_size, int bheaders_size ) {
-  capacity_ = arr_size;
-  array_    = new float[arr_size];
-  bheaders_ = new BlockHeaderData[bheaders_size];
-}
-
-void DataContainer::SetFHeader(FileHeaderData header) {
-  file_header_ = header;
+const float* DataContainer::ViewData() {
+  return array_;
 }
 
 bool DataContainer::IsEmpty() {
   return (index_ == 0);
 }
 
-bool DataContainer::PushFloat(float val) {
-  if (index_ < capacity_) {
+void DataContainer::Finalize() {
+  finalized_ = true;
+}
+
+bool DataContainer::AddVal(float val) {
+  if (index_ < capacity_ && !finalized_) {
     array_[index_] = val;
     ++index_;
     return true;
@@ -82,29 +86,34 @@ bool DataContainer::PushFloat(float val) {
   return false;
 }
 
-int DataContainer::GetLength() {
+int DataContainer::Filled() {
   return index_;
 }
 
-int DataContainer::GetCapacity() {
+int DataContainer::Capacity() {
   return capacity_;
 }
 
-float DataContainer::PullFloat() {
-  --index_; // Check IsEmpty() before using
-  return array_[index_+1];
-}
-
 void DataContainer::SetBHeader(int pos, BlockHeaderData bheader) {
-  bheaders_[pos] = bheader;
+  if (!finalized_) {
+    bheaders_[pos] = bheader;
+  }
 }
 
 void DataContainer::SetFStatus(FileStatus status) {
-  fstatus_ = status;
+  if (!finalized_) {
+    fstatus_ = status;
+  }
 }
 
-bool DataContainer::GetFlag(int flag) {
-  switch (flag) {
+void DataContainer::SetFHeader(FileHeaderData header) {
+  if (!finalized_) {
+    file_header_ = header;
+  }
+}
+
+bool DataContainer::CheckFlag(int flag_num) {
+  switch (flag_num) {
     case 1:  return fstatus_.s_data;
     case 2:  return fstatus_.s_spec;
     case 3:  return fstatus_.s_32;

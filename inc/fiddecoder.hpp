@@ -9,21 +9,20 @@
 #ifndef FID_DECODER_HPP
 #define FID_DECODER_HPP
 
-#include <string>
 #include <fstream>
 
-#include "datacontainer.hpp"
+class  DataContainer;
+struct FileHeaderData;
+struct BlockHeaderData;
 
 class FIDDecoder {
  public:
   FIDDecoder();
 
   bool          SetFlag(int status, int flag);
-  void          SetFIDPath(std::string new_path);
-  DataContainer ExtractFIDData();
+  DataContainer ExtractFIDData(std::string path);
 
  private:
-  std::string fid_path_;
   std::ifstream fid_file_;
 
   float           SwapFloat(float value);

@@ -51,7 +51,7 @@ struct FileStatus {
 
 class DataContainer {
  public:
-  DataContainer();
+  DataContainer(int arr_size, int bheaders_size);
   DataContainer(const DataContainer&);
   DataContainer(DataContainer&& other);
   ~DataContainer();
@@ -62,19 +62,19 @@ class DataContainer {
   void SetFHeader(FileHeaderData header);
   void SetFStatus(FileStatus status);
   void SetBHeader(int pos, BlockHeaderData bheader);
-  void SetSize(int arr_size, int bheaders_size);
+  bool AddVal(float val);
+  void Finalize();
 
-  int  GetLength();
-  int  GetCapacity();
-  bool GetFlag(int flag);
-
-  float PullFloat();
-  bool  PushFloat(float val);
-  bool  IsEmpty();
+  int  Filled();
+  int  Capacity();
+  bool CheckFlag(int flag_num);
+  bool IsEmpty();
+  const float* ViewData();
 
  private:
   int    index_;
-  long   capacity_;
+  int    capacity_;
+  bool   finalized_;
   float* array_;
 
   FileStatus       fstatus_;

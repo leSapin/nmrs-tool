@@ -19,20 +19,26 @@
 #include "analyzer.hpp"
 #include "spectrumwin.hpp"
 #include "numericwin.hpp"
+
 #include "nmrmlparser.hpp"
+#include "datacontainer.hpp"
 
 struct Fl_Menu_Bar;
 
 class Interface : public Fl_Window {
  public:
   Interface(int w, int h, const char* l);
+  const DataContainer* FIDView();
 
  private:
+  Fl_Menu_Bar* menu_bar_;
+
   SpectrumWin spectrum_win_;
   NumericWin  numeric_win_;
   Analyzer    analyzer_;
 
-  Fl_Menu_Bar *menu_bar_;
+  NMRMLParser   parser_;
+  DataContainer fid_;
 };
 
 #endif // INTERFACE_HPP

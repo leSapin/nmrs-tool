@@ -7,12 +7,11 @@
  */
 
 #include "fiddecoder.hpp"
+#include "datacontainer.hpp"
 
 using namespace std;
 
-FIDDecoder::FIDDecoder() {
-  fid_path_ = "";
-}
+FIDDecoder::FIDDecoder() {}
 
 float FIDDecoder::SwapFloat(float value) {
   // Convert mid-little endian to little endian float
@@ -26,10 +25,6 @@ float FIDDecoder::SwapFloat(float value) {
   out.b[3] = in.b[2];
 
   return out.outFloat;
-}
-
-void FIDDecoder::SetFIDPath(string new_path) {
-  fid_path_ = new_path;
 }
 
 // Varian devices store data in big-endian format
@@ -111,11 +106,9 @@ bool FIDDecoder::SetFlag(int status, int flag) {
   return (status & (1 << flag));
 }
 
-DataContainer FIDDecoder::ExtractFIDData() {
-  DataContainer res;
-
-  fid_file_.open(fid_path_ + "/fid", ios::binary | ios::in);
-  if (!fid_file_) {return res;}
+DataContainer FIDDecoder::ExtractFIDData(std::string path) {
+  fid_file_.open(path + "/fid", ios::binary | ios::in);
+  if (!fid_file_) {return DataContainer(1, 1);}
 
   FileHeaderData header = DecodeFileHeader();
 
@@ -123,7 +116,8 @@ DataContainer FIDDecoder::ExtractFIDData() {
   int fid_bytes = (header.bbytes - 28 ) * header.nblocks;
   int arr_size = ((fid_bytes / sizeof(float)));
 
-  res.SetSize(arr_size, header.nblocks * header.nbheaders);
+  DataContainer res(arr_size, header.nblocks * header.nbheaders);
+
   res.SetFHeader(header);
   FileStatus fstatus = {SetFlag(header.status, 0),
                         SetFlag(header.status, 1),
@@ -151,11 +145,12 @@ DataContainer FIDDecoder::ExtractFIDData() {
 
     for (int j = 0; j < arr_size / header.nblocks; ++j) {
       fid_file_.read(reinterpret_cast<char*>(&tmp_float), 4);
-      res.PushFloat(SwapFloat(tmp_float));
+      res.AddVal(SwapFloat(tmp_float));
     }
   }
 
   fid_file_.close();
+  res.Finalize(); // Make the DataContainer immutable
 
   return res;
 }
